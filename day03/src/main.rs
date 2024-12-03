@@ -68,12 +68,10 @@ fn part(input: &str, honor_conditionals: bool) -> u64 {
                 }
             }
             _ => {
-                state = {
-                    if char == 'd' {
-                        State::StartConditional
-                    } else {
-                        State::SearchingInstruction
-                    }
+                state = match char {
+                    'd' => State::StartConditional,
+                    'm' => State::M,
+                    _ => State::SearchingInstruction
                 }
             }
         }
