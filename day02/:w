@@ -1,0 +1,102 @@
+use itertools::Itertools;
+use std::fs::File;
+use std::io::{BufRead, BufReader};
+
+#[derive(PartialEq, Copy, Clone, Debug)]
+enum Direction {
+    Increasing,
+    Decreasing,
+    Undefined,
+}
+
+fn part1(reports: &Vec<Vec<u32>>) -> usize {
+    reports
+        .iter()
+        .filter(|r| {
+            let mut direction = Direction::Undefined;
+            r.iter().tuple_windows::<(_, _)>().all(|item| {
+                if item.1 > item.0 && (direction == Direction::Undefined || direction == Direction::Increasing) {
+                    direction = Direction::Increasing;
+                    let diff = item.1.saturating_sub(*item.0);
+                    if diff >= 1 && diff <= 3 {
+                        return true;
+                    }
+                }
+                if item.1 < item.0 && (direction == Direction::Undefined || direction == Direction::Decreasing) {
+                    direction = Direction::Decreasing;
+                    let diff = item.0.saturating_sub(*item.1);
+                    if diff >= 1 && diff <= 3 {
+                        return true;
+                    }
+                }
+                false
+            })
+        })
+        .count()
+}
+
+// Checks wether the numbers match the given direction and
+// differ between 1 and 3, returns optional direction if rules matched
+fn check_rules(item: &[u32], direction: Direction) -> Option<Direction> {
+    let left = item[0];
+    let right = item[1];
+    let diff = left.abs_diff(right);
+    if right > left {
+        if direction == Direction::Undefined || direction == Direction::Increasing {
+            if diff >= 1 && diff <= 3 {
+                return Some(Direction::Increasing);
+            }
+        }
+    }
+    if left > right {
+        if direction == Direction::Undefined || direction == Direction::Decreasing {
+            if diff >= 1 && diff <= 3 {
+                return Some(Direction::Decreasing);
+            }
+        }
+    }
+    None
+}
+
+fn check(item: &[u32], current: Option<u32>) {
+
+    let current = match current {
+        Some(c) => c,
+        None => {
+            item[0]
+        }
+    };
+
+    let remainder = &item[1..];
+
+    println!("{:#?}, {:#?}", current, remainder);
+    check(remainder, Some(current));
+}
+
+fn part2(reports: &Vec<Vec<u32>>) -> usize {
+    reports
+        .iter()
+        .filter(|r| {
+            let mut direction = Direction::Undefined;
+            let mut direction_memory = Direction::Undefined;
+            let mut tolerated = false;
+            let mut memory: Option<u32> = None;
+            let mut chopped = false;
+
+            check(r, None);
+
+            r.windows(2).all(|item| {
+                false
+            })
+        })
+        .count()
+}
+
+fn main() {
+    let reports: Vec<Vec<_>> = BufReader::new(File::open("input.txt").unwrap())
+        .lines()
+        .map(|l| l.unwrap())
+        .map(|l| l.split_whitespace().map(|d| d.parse().unwrap()).collect())
+        .collect();
+    println!("part1: {}, part2: {}", part1(&reports), part2(&reports));
+}
