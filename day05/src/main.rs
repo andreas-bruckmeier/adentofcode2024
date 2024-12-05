@@ -1,6 +1,6 @@
 use std::fs;
 
-fn update_ok(update: &Vec<&str>, rules: &Vec<(&str, &str)>) -> u32 {
+fn update_ok(update: &Vec<&str>, rules: &Vec<(&str, &str)>, count_correctly: bool) -> u32 {
     for (page_index, page) in update.iter().enumerate() {
         // rules for left side
         for rule in rules.iter().filter(|rule| rule.0 == *page) {
@@ -23,7 +23,7 @@ fn update_ok(update: &Vec<&str>, rules: &Vec<(&str, &str)>) -> u32 {
 }
 
 fn main() {
-    let input = fs::read_to_string("input.txt").unwrap();
+    let input = fs::read_to_string("test.txt").unwrap();
     let (rules, updates) = input.split_once("\n\n").unwrap();
     let rules: Vec<_> = rules.lines().map(|l| l.split_once("|").unwrap()).collect();
     let updates: Vec<_> = updates
@@ -31,6 +31,8 @@ fn main() {
         .map(|l| l.split(",").collect::<Vec<_>>())
         .collect();
 
-    let result = updates.iter().map(|u| update_ok(&u, &rules)).sum::<u32>();
-    println!("part1: {}", result);
+    let result1 = updates.iter().map(|u| update_ok(&u, &rules, true)).sum::<u32>();
+    let result2 = updates.iter().map(|u| update_ok(&u, &rules, false)).sum::<u32>();
+    println!("part1: {}", result1);
+    println!("part2: {}", result2);
 }
