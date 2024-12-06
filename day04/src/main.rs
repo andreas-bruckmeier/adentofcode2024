@@ -17,7 +17,8 @@ fn read_char_grid(filename: impl AsRef<Path>) -> Vec<Vec<char>> {
     two_d_array
 }
 
-fn build_paths(grid: Vec<Vec<char>>) -> Vec<String> {
+fn count_xmas(grid: &Vec<Vec<char>>) -> usize {
+
 
     let width = grid.len();
     let height = grid[0].len();
@@ -25,7 +26,7 @@ fn build_paths(grid: Vec<Vec<char>>) -> Vec<String> {
     let mut paths: Vec<String> = Vec::new();
 
     // rows
-    for row in &grid {
+    for row in grid {
         paths.push(row.iter().collect());
         paths.push(row.iter().rev().collect());
     }
@@ -72,13 +73,70 @@ fn build_paths(grid: Vec<Vec<char>>) -> Vec<String> {
         paths.push(path.iter().collect());
     }
 
-    paths
+    paths.iter().map(|p| p.match_indices("XMAS").count()).sum()
+}
+
+fn count_x_mas(grid: &[Vec<char>]) -> usize {
+
+    let n = grid.len();
+    let m = grid[0].len();
+
+    let mut count: usize = 0;
+
+    for (row, line) in grid.iter().enumerate() {
+        for (col, &ch) in line.iter().enumerate() {
+            if ch == 'A' {
+                let top_left = if row > 0 && col > 0 {
+                    Some(grid[row - 1][col - 1])
+                } else {
+                    None
+                };
+
+                let top_right = if row > 0 && col + 1 < m {
+                    Some(grid[row - 1][col + 1])
+                } else {
+                    None
+                };
+
+                let bottom_left = if row + 1 < n && col > 0 {
+                    Some(grid[row + 1][col - 1])
+                } else {
+                    None
+                };
+
+                let bottom_right = if row + 1 < n && col + 1 < m {
+                    Some(grid[row + 1][col + 1])
+                } else {
+                    None
+                };
+
+                let mut found1 = false;
+                let mut found2 = false;
+
+                if let (Some(tl), Some(br)) = (top_left, bottom_right) {
+                    if (tl == 'M' && br == 'S') || (tl == 'S' && br == 'M') {
+                        found1 = true;
+                    }
+                }
+
+                if let (Some(tr), Some(bl)) = (top_right, bottom_left) {
+                    if (tr == 'M' && bl == 'S') || (tr == 'S' && bl == 'M') {
+                        found2 = true;
+                    }
+                }
+
+                if found1 && found2 {
+                    count += 1;
+                }
+            }
+        }
+    }
+
+    count
 }
 
 fn main() {
     let grid = read_char_grid("input.txt");
-    let paths = build_paths(grid);
-
-    let part1: usize = paths.iter().map(|p| p.match_indices("XMAS").count()).sum();
-    println!("part1: {}", part1);
+    println!("part1: {}", count_xmas(&grid));
+    println!("part2: {}", count_x_mas(&grid));
 }
